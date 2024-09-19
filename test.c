@@ -26,8 +26,15 @@ char    **prepare_array(t_token **list);
         }
         i++;
         (*list) = (*list)->next;
+
         num_args--;
     }
     args[i] = NULL;
     return (args);
+}
+
+//avec la copie de l'environnement sous forme de liste chainee
+char *find_path(char *str, t_data *data)
+{
+
 }

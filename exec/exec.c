@@ -1,7 +1,16 @@
 #include "../Includes/minishell.h"
-char    *find_path(char **str, char **env)
-{
 
+//fonctionne comme getenv sur la liste chainee
+// renvoie le noeud de la liste qui correspond a la variable demandee
+t_list  *ft_getenv(char *var, t_list *env)
+{
+    while (env)
+    {
+        if (!ft_strcmp(var, env->name))
+            return (env);
+        env = env->next;
+    }
+    return (NULL);
 }
 int is_absolute_path(char *str)
 {
@@ -11,12 +20,12 @@ int is_absolute_path(char *str)
         return (0);
 }
 //retourne la longueur du tableau pour execve
-int find_len_array(t_token **current_token)
+int find_len_array(t_token *token)
 {
     t_token *temp;
     int num_args;
 
-    temp = (*current_token);
+    temp = token;
     if (temp->token_type == CMD)
     {
         num_args++;
@@ -34,13 +43,13 @@ int find_len_array(t_token **current_token)
 // allouer de la place pour le tableau = cmd + args
 // copier chaque cmd + args dans le double tableau
 // PS: amelioration simple en fonction pour changer n'importe quelle liste chainee en double tableau
-char    **prepare_array(t_token **current_token)
+char    **prepare_array(t_token *token)
 {
     int num_args;
     int i;
 
     i = 0;
-    num_args = find_len_array(current_token);
+    num_args = find_len_array(token);
     char **args = malloc((num_args + 1) * sizeof(char *));
     if (!args)
     {
@@ -50,14 +59,14 @@ char    **prepare_array(t_token **current_token)
     }
     while (num_args > 0)
     {
-        args[i] = ft_strdup((*current_token)->str);
+        args[i] = ft_strdup(token->str);
         if (!args[i])
         {
             ft_free_array(args);
             return ;
         }
         i++;
-        (*current_token) = (*current_token)->next;
+        token = token->next;
         num_args--;
     }
     args[i] = NULL;
@@ -67,22 +76,23 @@ char    **prepare_array(t_token **current_token)
 //verifie si la commande est un chemin absolu
 // si non appel find_path
 //si oui execute la commande avec execve
-void    execute_cmd(t_data **data)
+void    execute_cmd(t_data *data)
 {
     char **args;
 
-    args = prepare_array((*data)->current_token);
+    args = prepare_array(data->token);
     if (is_absolute_path(args[0]))
         execve(args[0], args, data->env);
     else
-        find_path(args[0]);
+        ft_getenv("PATH", data->env);
+        
 }
 
 // verifier si c'est un builtin
 // creer un double tableau avec la commande et les arguments pour execve
 // execute_builtin
 // else
-void    handle_cmd(t_data **data)
+void    handle_cmd(t_data *data)
 {
     execute_cmd(data);
 }
@@ -98,13 +108,10 @@ void    handle_cmd(t_data **data)
 //sort de la boucle a la fin de la ligne de commande
 void exec(t_data *data)
 {
-    t_token **current_token;
-
-    current_token = data->token;
-    while((*current_token))
+    while((data->token))
     {
-        if ((*current_token)->token_type == CMD)
-            handle_cmd(current_token);
+        if (data->token->token_type == CMD)
+            handle_cmd(data);
     }
-} 
+}
  
