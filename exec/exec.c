@@ -1,6 +1,15 @@
 #include "../Includes/minishell.h"
+char    *find_path(char **str, char **env)
+{
 
-
+}
+int is_absolute_path(char *str)
+{
+    if (str[0] == '/')
+        return (1);
+    else
+        return (0);
+}
 //retourne la longueur du tableau pour execve
 int find_len_array(t_token **current_token)
 {
@@ -24,6 +33,7 @@ int find_len_array(t_token **current_token)
 // cree le double tableau pour execve
 // allouer de la place pour le tableau = cmd + args
 // copier chaque cmd + args dans le double tableau
+// PS: amelioration simple en fonction pour changer n'importe quelle liste chainee en double tableau
 char    **prepare_array(t_token **current_token)
 {
     int num_args;
@@ -54,22 +64,27 @@ char    **prepare_array(t_token **current_token)
     return (args);
 }
 //recupere le tableau d'args pour execve
-//
-void    execute_cmd(t_token **current_token)
+//verifie si la commande est un chemin absolu
+// si non appel find_path
+//si oui execute la commande avec execve
+void    execute_cmd(t_data **data)
 {
     char **args;
 
-   args = prepare_array(current_token);
+    args = prepare_array((*data)->current_token);
+    if (is_absolute_path(args[0]))
+        execve(args[0], args, data->env);
+    else
+        find_path(args[0]);
 }
 
 // verifier si c'est un builtin
 // creer un double tableau avec la commande et les arguments pour execve
 // execute_builtin
 // else
-void    handle_cmd(t_token **current_token)
+void    handle_cmd(t_data **data)
 {
-
-    execute_cmd(current_token);
+    execute_cmd(data);
 }
 
 
