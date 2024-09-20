@@ -38,7 +38,7 @@ int find_len_array(t_token *token)
     }
     return (num_args);
 }
-
+//
 // cree le double tableau pour execve
 // allouer de la place pour le tableau = cmd + args
 // copier chaque cmd + args dans le double tableau
@@ -82,7 +82,14 @@ void    execute_cmd(t_data *data)
 
     args = prepare_array(data->token);
     if (is_absolute_path(args[0]))
-        execve(args[0], args, data->env);
+    {
+        if (!access(args[0], F_OK && X_OK))
+            execve(args[0], args, data->env);
+        else
+            {
+                ft_printf("PATH error\n");
+                return ;
+            }
     else
         ft_getenv("PATH", data->env);
         
